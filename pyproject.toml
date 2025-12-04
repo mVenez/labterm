@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "labterm"
+version = "1.0.0"
+description = "A Python library library for building interactive dashboards to communicate with lab instruments"
+requires-python = ">=3.8"
+dependencies = []
+readme = "README.md"
+authors = [
+    {name = "Matteo Veneziano", email = "matteo.veneziano@ikmail.com"}
+]
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+docs = [
+    "sphinx>=7.0",
+    "pydata-sphinx-theme",
+    "sphinx-copybutton",
+    "sphinx-autodoc-typehints>=1.25",  # Better type hint rendering
+    "myst-parser>=2.0",            # For Markdown support
+]
+
+[tool.setuptools.package-dir]
+"" = "src"
