@@ -30,6 +30,10 @@ class DashboardItem(ABC):
             - int: exact column and row position, x,y, are ints.
         halign (Literal["left", "center", "right"]): horizontal alignment of the item with respect to the x,y coordinates
         valign (Literal["top", "center", "bottom"]): vertical alignment of the item with respect to the x,y coordinates
+        xoffset (int): number of columns, horizontal offset with respect to the x position.
+            Useful to group together groups of items.
+        yoffset (int): number of rows, vertical offset with respect to the y position.
+            Useful to group together groups of items.
     """
     navigable: bool = False
     editable: bool = False
@@ -48,7 +52,9 @@ class DashboardItem(ABC):
         decimals: int = 2,
         xycoords: Literal["prop", "int"] = "prop", 
         halign: Literal["left", "center", "right"] = "left",
-        valign: Literal["top", "center", "bottom"] = "top"
+        valign: Literal["top", "center", "bottom"] = "top",
+        xoffset: int = 0,
+        yoffset: int = 0
     ) -> None:
         self.x = x
         self.y = y
@@ -64,7 +70,8 @@ class DashboardItem(ABC):
         self.xycoords = xycoords
         self.halign = halign
         self.valign = valign
-
+        self.xoffset = xoffset
+        self.yoffset = yoffset
 
     @abstractmethod
     def draw(self, screen, selected: bool = False) -> None:
@@ -133,6 +140,10 @@ class DashboardItem(ABC):
             raise Exception("DashboardItem: Unknown horizontal alignment blabla")
         
         # TODO: Apply vertical alignment
+        
+        # Apply offsets
+        xpos += self.xoffset
+        ypos += self.yoffset
         
         # Clamp to valid screen boundaries
         if xpos < 0:
