@@ -2,6 +2,7 @@ import curses
 import time
 import threading
 import queue
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .dashboard_item import *
 from .instrument import Instrument
@@ -16,7 +17,9 @@ class Dashboard:
 
     Args:
         screen: curses screen object supplied by `curses.wrapper`.
-        data_update_interval (float): In seconds, interval between instrument polls
+        data_update_interval (float): In seconds, interval between instrument polls.
+            More precisely, interval between the moment when the last instrument has updated and the next polling starts.
+        data_update_workers (int): The maximum number of instruments updating at the same time. Defaults to the maximum number of workers which can be assigned by the system.
         cycle (bool): Whether the grid allows cycling, i.e. navigating between the first and the last element of a line/column.
         header (str): A string continuously printed on the top left of the dashboard.
         show_time (bool): Whether to show the current time on the top of the dashboard.
@@ -34,13 +37,15 @@ class Dashboard:
     Threading / lifecycle:
         - `Dashboard.__init__` starts a daemon thread that runs `_update_data_loop`.
         - `run()` is the main thread's drawing loop; it consumes the data queue.
-        - `update_data` exceptions are caught and logged; ensure actions and updates are thread-safe where necessary.
+        - `update_data` launches all the instrument data updates at once, and saves in the data queue the updates of each instrument, as they finish.
+            Once all the instruments have been updated, after `data_update_interval` seconds another update is called for all instruments.
+            Exceptions are caught and logged.
 
     Example:
         >>> def main(stdscr):
         ...     dash = Dashboard(stdscr, header="LabTerm example")
-        ...     dash.add_instrument(MyInstrument(channel=0))
-        ...     dash.add_item(MyDashboardItem(...))
+        ...     dash.add_instruments(MyInstrument(channel=0))
+        ...     dash.add_items(MyDashboardItem(...))
         ...     dash.run()...   
         ... if __name__ == '__main__':
         ...     import curses
@@ -57,6 +62,7 @@ class Dashboard:
         self, 
         screen,
         data_update_interval: float = 0.3,
+        data_update_workers: int = None,
         cycle: bool = True, 
         header: str = "",
         show_time: bool = True,
@@ -77,7 +83,9 @@ class Dashboard:
         # Dashboard mode tracking
         self._running = True
         self._editing = False    # keeps track if the user is editing or not
-        self._data_update_interval = data_update_interval  # [s], how often to update data
+
+        self._data_update_interval = data_update_interval
+        self._data_update_workers = data_update_workers
 
         # Display options
         self._header = header
@@ -207,46 +215,50 @@ class Dashboard:
 
     def _update_data_loop(self) -> None:
         """
-        Background loop that polls instruments and queues updated values.
+        Background loop that polls instruments (in separate threads) and queues updated values.
 
         Behavior:
-            - Iterates over `self._items` and, if an item is bound to an instrument
-              channel, calls `instrument.update_data()` and queues the new value.
-            - Puts a list of `(item, new_value)` tuples into `self._data_queue`.
-            - Sleep interval controlled by `self._data_update_interval`.
+            1. Iterates over `self._instruments` and calls `instrument.update_data()` with a ThreadPoolExectuor.
+            2. As the instruments complete the data update, asynchronously puts a list of the updated `(item, new_value)` tuples into `self._data_queue`.
+            3. Once all the instruments have completed the data update, sleep interval controlled by `self._data_update_interval`, then start again.
 
         Notes:
-            - Implementations of `Instrument.update_data` should be safe to call
-              from a separate thread.
-            - Consumers (the main thread) should only access item.value from the
-              main thread to avoid race conditions.
+            - Consumers (the main thread) should only access item.value from the main thread to avoid race conditions.
+            - There is currently a timeout of 60 seconds set for the instrument data update.
 
         Raises:
             Exceptions are caught and logged via `self._log`.
         """
+        executor = ThreadPoolExecutor(max_workers=self._data_update_workers)
         while self._running:
             try:
-                updated_items = []
-                # Update dashboard items with data from instruments
-                for item in self._items:
-                    if (item.channel is not None and item.data is not None):
-                        # first update info contained in instrument object
-                        instrument = self._instruments[item.channel]
-                        instrument.update_data() 
+                future_to_items = {} # keys are futures, values are list of items
+                for channel, instrum in self._instruments.items():
+                    future = executor.submit(instrum.update_data)
+                    if future not in future_to_items:
+                        future_to_items[future] = []
+                    for item in self._items:
+                        if item.channel==channel and item.data is not None:
+                            future_to_items[future].append(item)
 
-                        # grab the updated value for the quantity/state the item manages
-                        new_value = instrument.data[item.data]
+                for future in as_completed(future_to_items.keys(), timeout=60):
+                    try:
+                        future.result()
+                        instrument_updates = []
+                        for item in future_to_items[future]:
+                            instrument = self._instruments[item.channel]
+                            new_value = instrument.data.get(item.data)
+                            if new_value is not None:
+                                instrument_updates.append((item, new_value))
+                        if instrument_updates:
+                            self._data_queue.put(instrument_updates)
 
-                        # form a list with all the updates
-                        if new_value is not None:
-                            updated_items.append((item,new_value))
+                    except Exception as e:
+                        self._log(f"Error updating instrument: {e}")
 
-                # finally, put the list of all incoming updates in the data queue, to be processed by `self.run()`
-                self._data_queue.put(updated_items) # put list in queue
                 time.sleep(self._data_update_interval) 
                 
             except Exception as e:
-                # Handle any communication errors with instruments
                 self._log(f"Error updating instrument data: {e}")
                 time.sleep(1.0)
 
