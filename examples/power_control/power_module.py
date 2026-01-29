@@ -7,12 +7,15 @@ from labterm import Instrument
 
 class PowerModule(Instrument):
     """
-    Power module
+    This object represents a "power module", i.e. a system implementing some form of control and monitoring of the power supplied to a part of your setup.
+    It allows to power on/off the module, set a target value for voltage, monitor the feedback and measure the current.
+
+    You can adapt this class to your setup by replacing the mock measurements and actions in the `update_data()` and `action()` methods with your implementations.
     """
     min_voltage = 800 # [V]
     max_voltage = 2200 # [V]
     
-    def __init__(self, channel: int, savestate_directory: str = '.', pulse_delay: float = 1):
+    def __init__(self, channel: int):
         super().__init__(channel)
         self.data: dict[str, Any] = {
             'target_voltage': self.min_voltage, # [V]
@@ -62,6 +65,7 @@ class PowerModule(Instrument):
 
 
     def ramp(self, new_voltage):
+        """Ramping routine, increases or decreases the voltage until the target is met"""
         while (abs(self.data['actual_voltage'] - new_voltage) >= 10):
             if (self.data['actual_voltage'] - new_voltage < 0):
                 self.data['actual_voltage'] += 12
@@ -84,7 +88,7 @@ class PowerModule(Instrument):
 
     def _set_target(self, new_target_voltage) -> None:
         """
-        Define a new target voltage for the OM. If the OM is not busy and the target is not close to the current voltage, it will ramp up/down to meet the target.
+        Define a new target voltage. If the power module is not busy and the target is not close to the current voltage, it will ramp up/down to meet the target.
         """
         # ==== Security checks ====
         if (new_target_voltage > self.max_voltage):
@@ -107,7 +111,7 @@ class PowerModule(Instrument):
         
     def _turn_on(self) -> None:
         """
-        Turn on the optical module. Once on, the OM will ramp up to the target voltage.
+        Turn on the power module. Once on, it will ramp up to the target voltage.
         """
         if self._ramping:
             self._log(f"Can not turn on (currently ramping)")
@@ -123,7 +127,7 @@ class PowerModule(Instrument):
 
     def _turn_off(self) -> None:
         """
-        Ramp down the voltage to the minimum, then turn off the optical module.
+        Ramp down the voltage to the minimum, then turn off the power module.
         """
         if self._ramping:
             self._log(f"Can not turn off (currently ramping)")
