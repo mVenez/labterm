@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath('../../src'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'labterm'
-copyright = '2025, Matteo Veneziano'
+copyright = '2026, Matteo Veneziano'
 author = 'Matteo Veneziano'
 release = '1.0.0'
 

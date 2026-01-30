@@ -10,9 +10,9 @@ from .instrument import Instrument
 
 class Dashboard:
     """
-    Curses dashboard that displays `DashboardItem`s and polls `Instrument`s.
+    Curses dashboard that displays ``DashboardItem``\\s and polls ``Instrument``\\s.
 
-    The Dashboard runs a background thread to periodically call `Instrument.update_data()`
+    The Dashboard runs a background thread to periodically call ``Instrument.update_data()``
     and places new values into an internal queue that the main drawing loop consumes.
 
     Args:
