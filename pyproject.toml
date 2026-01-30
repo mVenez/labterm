@@ -1,18 +1,18 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "labterm"
 version = "1.0.0"
-description = "A Python library library for building interactive dashboards to communicate with lab instruments"
+description = "A Python library to build interactive dashboards in terminal"
 requires-python = ">=3.8"
 dependencies = []
 readme = "README.md"
 authors = [
     {name = "Matteo Veneziano", email = "matteo.veneziano@ikmail.com"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 
 [project.optional-dependencies]
 docs = [
