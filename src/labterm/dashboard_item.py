@@ -356,3 +356,46 @@ class Editable(DashboardItem):
 
         else:
             return (False, None)
+        
+class Light(DashboardItem):
+    """
+    A dynamic, non-navigable, non-editable item, which updates boolean data associated with an instrument and represents it with a green (True) or red (False) circle in a single character.
+
+    Args:
+        x: x position in dashboard. 
+            The way this value translates to a column of the terminal is decided by xycoords
+        y: y position in dashboard (higher y corresponds to a lower position). 
+            The way this value translates to a row of the terminal is decided by xycoords
+        xgrid (int): If navigable, determines the x position of the item on the navigable grid
+        ygrid (int): If navigable, determines the y position of the item on the navigable grid
+        channel (int): A number associating the items with an instrument.
+            Enter a channel equal to the one set for the desired instrument for the two to communicate. 
+        data (str): The specific data associated with the item, obtained by the instrument of corresponding channel.
+            Must be one of the keys of the instrument data dict.
+            The item will continuosly update the data in the way described by the instrument update_data() method.
+        initial_value (bool): The initial value stored in the item.
+    """
+    def __init__(self, 
+                 x, y,
+                 channel: int, data: str,
+                 initial_value = False,
+                 **kwargs
+                 ):
+        super().__init__(
+            x, y, 
+            channel=channel, data=data, 
+            value=initial_value, 
+            **kwargs
+        )
+
+    def draw(self, screen, **kwargs):
+        if self.value is None:
+            value_str = "-"
+        else:
+            value_str =  "●"
+        text = self.text_before + value_str + self.text_after
+        xpos, ypos = self._calculate_position(screen, len(text))
+        if self.value:
+            screen.addstr(ypos, xpos, text, curses.color_pair(3))
+        else:
+            screen.addstr(ypos, xpos, text, curses.color_pair(4))

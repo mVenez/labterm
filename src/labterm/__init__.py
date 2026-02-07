@@ -5,6 +5,7 @@ from .dashboard_item import (
     Switch,
     Readonly,
     Editable,
+    Light
 )
 from .instrument import Instrument
 
@@ -17,4 +18,5 @@ __all__ = [
     "Readonly",
     "Editable",
     "Instrument",
+    "Light"
 ]
