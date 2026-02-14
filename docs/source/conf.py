@@ -47,13 +47,21 @@ autosummary_generate = True
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ['_static']
+html_title = 'LabTerm Documentation'
 
 html_theme_options = {
     "navigation_with_keys": True,
     # "top_of_page_button": "edit",
     "sidebar_includehidden": True,
     "external_links": [],
-    "icon_links_label": "Icon Links",
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/mVenez/labterm",
+            "icon": "fa-brands fa-square-github",
+            "type": "fontawesome",
+        },
+    ],
     "show_prev_next": False,
     "search_bar_text": "Search the docs ...",
     "navigation_with_keys": False,
@@ -64,7 +72,13 @@ html_theme_options = {
     "navbar_align": "left",
     "header_links_before_dropdown": 5,
     "header_dropdown_text": "More",
+    "pygments_light_style": "tango",
+    "pygments_dark_style": "monokai",
 }
-# pygments_style = "friendly"
-# pygments_dark_style = "monokai"
+
+html_sidebars = {   # removes the left sidebar on these pages
+    "user_guide": [],  
+    "install" : []
+}
+
 highlight_language = "python"
