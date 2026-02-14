@@ -10,21 +10,21 @@ from .instrument import Instrument
 
 class Dashboard:
     """
-    Curses dashboard that displays ``DashboardItem``\\s and polls ``Instrument``\\s.
+    Curses dashboard that displays :class:`.DashboardItem` and polls :class:`.Instrument`.
 
-    The Dashboard runs a background thread to periodically call ``Instrument.update_data()``
+    The Dashboard runs a background thread to periodically call :obj:`.Instrument.update_data()`
     and places new values into an internal queue that the main drawing loop consumes.
 
     Args:
-        screen: curses screen object supplied by `curses.wrapper`.
+        screen: curses screen object supplied by ``curses.wrapper``.
         data_update_interval (float): In seconds, interval between instrument polls.
             More precisely, interval between the moment when the last instrument has updated and the next polling starts.
         data_update_workers (int): The maximum number of instruments updating at the same time. Defaults to the maximum number of workers which can be assigned by the system.
         cycle (bool): Whether the grid allows cycling, i.e. navigating between the first and the last element of a line/column.
         header (str): A string continuously printed on the top left of the dashboard.
         show_time (bool): Whether to show the current time on the top of the dashboard.
-        show_log (bool): Whether to show the last `max_log_messages` logs at the bottom of the dashboard.
-        show_controls (bool): Whether to show the controls help text (`controls_text`) in a section of the dashboard.
+        show_log (bool): Whether to show the last :obj:`max_log_messages` logs at the bottom of the dashboard.
+        show_controls (bool): Whether to show the controls help text (:obj:`controls_text`) in a section of the dashboard.
         controls_text (list[str] | None): The text detailing the dashboard controls.
         grid_start (tuple[int,int]): The position the item selector starts in at the launch of the program.
         max_log_messages (int): Maximum number of log messages to be shown at once.
@@ -212,6 +212,8 @@ class Dashboard:
     def show_log(self, show:bool) -> None:
         """Sets whether the log messages are printed or not on the dashboard."""
         self._show_log = show
+        if not show:
+            self._max_log_messages = 0
 
     def _update_data_loop(self) -> None:
         """

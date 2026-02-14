@@ -74,7 +74,7 @@ class DashboardItem(ABC):
         self.yoffset = yoffset
 
     @abstractmethod
-    def draw(self, screen, selected: bool = False) -> None:
+    def draw(self, screen: curses.window, selected: bool = False) -> None:
         """
         Draw the item on the screen
         """
@@ -105,7 +105,7 @@ class DashboardItem(ABC):
         """
         pass
 
-    def _calculate_position(self, screen, text_length: int = 0):
+    def _calculate_position(self, screen: curses.window, text_length: int = 0):
         """
         Calculate the actual x, y position to draw the item on, based on coordinate system, horizontal and vertical alignment.
         
@@ -164,12 +164,13 @@ class Label(DashboardItem):
         y: y position in dashboard (higher y corresponds to a lower position). 
             The way this value translates to a row of the terminal is decided by xycoords
         text (str): The text to be printed
+        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
     """
     def __init__(self, x, y, text: str, **kwargs):
         super().__init__(x, y, **kwargs)
         self.value = text
 
-    def draw(self, screen, **kwargs):
+    def draw(self, screen: curses.window, **kwargs):
         text = self.text_before + self.value + self.text_after
         xpos, ypos = self._calculate_position(screen, len(self.value))
         screen.addstr(ypos, xpos, text, curses.A_BOLD | curses.color_pair(1))
@@ -196,6 +197,7 @@ class Switch(DashboardItem):
         action (str): The action to carry out when the item switches between the two possible states.
             Must be one of the actions foreseen by the instrument action() method.
         initial_value (bool): The initial value stored in the item.
+        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
     """
     navigable = True
     editable = False
@@ -219,7 +221,7 @@ class Switch(DashboardItem):
         )
         self.text = text
     
-    def draw(self, screen, selected):
+    def draw(self, screen: curses.window, selected):
         state_text = f"[{self.text[0]}]" if self.value else f"[{self.text[1]}]"
         text = self.text_before + state_text + self.text_after
         color = curses.color_pair(3) if self.value else curses.color_pair(4)
@@ -246,6 +248,7 @@ class Readonly(DashboardItem):
             Must be one of the keys of the instrument data dict.
             The item will continuosly update the data in the way described by the instrument update_data() method.
         initial_value (bool): The initial value stored in the item.
+        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
     """
     def __init__(self, 
                  x, y,
@@ -260,7 +263,7 @@ class Readonly(DashboardItem):
             **kwargs
         )
 
-    def draw(self, screen, **kwargs):
+    def draw(self, screen: curses.window, **kwargs):
         if self.value is None:
             value_str = "--"
         else:
@@ -289,6 +292,7 @@ class Editable(DashboardItem):
         action (str): The action to carry out when selecting the item.
             Must be one of the actions foreseen by the instrument action() method.
         initial_value (bool): The initial value stored in the item.
+        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
     """
     navigable = True
     editable = True
@@ -312,7 +316,7 @@ class Editable(DashboardItem):
         self._edit_buffer = initial_value
         self._editing = False
 
-    def draw(self, screen, selected: bool):
+    def draw(self, screen: curses.window, selected: bool):
         value_str = f"{self.value:.{self.decimals}f}"
         text = self.text_before + value_str + self.text_after
         xpos, ypos = self._calculate_position(screen, len(text))
@@ -374,6 +378,7 @@ class Light(DashboardItem):
             Must be one of the keys of the instrument data dict.
             The item will continuosly update the data in the way described by the instrument update_data() method.
         initial_value (bool): The initial value stored in the item.
+        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
     """
     def __init__(self, 
                  x, y,
@@ -388,7 +393,7 @@ class Light(DashboardItem):
             **kwargs
         )
 
-    def draw(self, screen, **kwargs):
+    def draw(self, screen: curses.window, **kwargs):
         if self.value is None:
             value_str = "-"
         else:

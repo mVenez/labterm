@@ -36,7 +36,8 @@ pygments_style = "sphinx"       # enable syntax highlighting
 
 # Napoleon settings for Google-style docstrings
 napoleon_google_docstring = True
-
+napoleon_numpy_docstring = False
+napoleon_use_ivar = True
 
 add_module_names = True
 autosummary_generate = True

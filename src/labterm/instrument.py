@@ -6,8 +6,8 @@ class Instrument(ABC):
     """
     Abstract base class for all instruments connected to the dashboard.
 
-    Concrete subclasses must implement `update_data` and `action`. The Dashboard
-    expects each instrument to expose a `data` dict and an optional `logger`
+    Concrete subclasses must implement :obj:`update_data()` and :obj:`action()`. The Dashboard
+    expects each instrument to expose a :obj:`data` dict and an optional :obj:`logger`
     callable.
 
     Args:
@@ -17,7 +17,7 @@ class Instrument(ABC):
         data (dict[str, Any]): Live instrument data. Keys and value types are
             instrument-specific. Dashboard items update their values from this dictionary.
         logger (Optional[Callable[[str], None]]): Optional logging callback set
-            by the `Dashboard` via `instrument.logger = self._log`.
+            by the :class:`.Dashboard` via ``instrument.logger = self._log``.
 
     Example:
         >>> class MyInstrument(Instrument):
@@ -44,7 +44,7 @@ class Instrument(ABC):
 
     @abstractmethod
     def action(self, action_id:str, *args: Any) -> None:
-        """Handle an action request from a `DashboardItem`.
+        """Handle an action request from a :class:`.DashboardItem`.
 
         Implementations should perform the action or raise a clear exception.
 
@@ -61,7 +61,7 @@ class Instrument(ABC):
     @abstractmethod
     def update_data(self) -> None:
         """
-        Refresh `self.data` with current instrument values.
+        Refresh :obj:`data` with current instrument values.
 
         This method is called periodically from a Dashboard background thread.
 
