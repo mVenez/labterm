@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
+"""
+02 - Power Control Example
+=======================
 
+A busier dashboard: several instruments with different data entries and controls. The Instrument was moved to a different file (`power_module.py`). 
+Shows how to define more complex, dynamic instruments.
+
+Run with:
+    python3 examples/02_power_control/main.py
+"""
 import curses
 import labterm as lt
 from power_module import PowerModule

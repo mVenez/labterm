@@ -1,5 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+"""
+03 - Server Status Example
+=======================
 
+A slightly different application: this dashboard continuously pings three ip addresses and shows a green light if it receives an answer, and red otherwise. LabTerm can be used for remote control, too!
+
+Run with:
+    python3 examples/03_server_status/main.py
+"""
 import curses
 import labterm as lt
 from tester import ServerTester
