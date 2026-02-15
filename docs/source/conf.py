@@ -34,11 +34,10 @@ templates_path = ['_templates']
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"       # enable syntax highlighting
 
-# Napoleon settings for Google-style docstrings
-napoleon_google_docstring = True
-napoleon_numpy_docstring = False
+# Napoleon settings for NumPy-style docstrings
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
 napoleon_use_ivar = True
-
 add_module_names = True
 autosummary_generate = True
 

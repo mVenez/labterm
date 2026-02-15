@@ -10,23 +10,28 @@ class Instrument(ABC):
     expects each instrument to expose a :obj:`data` dict and an optional :obj:`logger`
     callable.
 
-    Args:
-        channel (int): Unique channel id identifying the instrument.
+    Parameters
+    ----------
+    channel : int
+        Unique channel id identifying the instrument.
 
-    Attributes:
-        data (dict[str, Any]): Live instrument data. Keys and value types are
-            instrument-specific. Dashboard items update their values from this dictionary.
-        logger (Optional[Callable[[str], None]]): Optional logging callback set
-            by the :class:`.Dashboard` via ``instrument.logger = self._log``.
+    Attributes
+    ----------
+    data : dict[str, Any]
+        Live instrument data. Keys and value types are
+        instrument-specific. Dashboard items update their values from this dictionary.
+    logger : Optional[Callable[[str], None]]
+        Optional logging callback set
+        by the :class:`.Dashboard` via ``instrument.logger = self._log``.
 
-    Example:
-        >>> class MyInstrument(Instrument):
-        ...     def __init__(self, channel):
-        ...         super().__init__(channel)
-        ...         self.data = {'voltage': None}
-        ...
-        ...     def update_data(self):
-        ...         self.data['voltage'] = 3.3
+    Examples
+    --------
+    >>> class MyInstrument(Instrument):
+    ...     def __init__(self, channel):
+    ...         super().__init__(channel)
+    ...         self.data = {'voltage': None}
+    ...     def update_data(self):
+    ...         self.data['voltage'] = 3.3
     """
 
     def __init__(self, channel:int) -> None:
@@ -48,13 +53,19 @@ class Instrument(ABC):
 
         Implementations should perform the action or raise a clear exception.
 
-        Args:
-            action_id (str): Identifier for the requested action (e.g. "set_voltage").
-            *args: Additional action arguments.
+        Parameters
+        ----------
+        action_id : str
+            Identifier for the requested action (e.g. "set_voltage").
+        *args
+            Additional action arguments.
 
-        Raises:
-            ValueError: If arguments are invalid for the requested action.
-            RuntimeError: If the action could not be completed.
+        Raises
+        ------
+        ValueError
+            If arguments are invalid for the requested action.
+        RuntimeError
+            If the action could not be completed.
         """
         pass
 
@@ -65,8 +76,10 @@ class Instrument(ABC):
 
         This method is called periodically from a Dashboard background thread.
 
-        Raises:
-            Exception: Propagate exceptions if communication fails; Dashboard will
+        Raises
+        ------
+        Exception
+            Propagate exceptions if communication fails; Dashboard will
             catch and log them.
         """
         pass

@@ -7,33 +7,48 @@ class DashboardItem(ABC):
     """
     An item drawable on the dashboard, associated with a measured quantity or a state of a specific instrument.
 
-    Args:
-        x: x position in dashboard. 
-            The way this value translates to a column of the terminal is decided by xycoords
-        y: y position in dashboard (higher y corresponds to a lower position). 
-            The way this value translates to a row of the terminal is decided by xycoords
-        xgrid (int): If navigable, determines the x position of the item on the navigable grid
-        ygrid (int): If navigable, determines the y position of the item on the navigable grid
-        channel (int): A number associating the items with an instrument.
-            Enter a channel equal to the one set for the desired instrument for the two to communicate. 
-        data (str): The specific data associated with the item, obtained by the instrument of corresponding channel.
-            Must be one of the keys of the instrument data dict.
+    Parameters
+    ----------
+    x
+        x position in dashboard. The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). The way this value translates to a row of the terminal is decided by xycoords
+    xgrid : int
+        If navigable, determines the x position of the item on the navigable grid
+    ygrid : int
+        If navigable, determines the y position of the item on the navigable grid
+    channel : int
+        A number associating the items with an instrument.
+        Enter a channel equal to the one set for the desired instrument for the two to communicate. 
+    data : str
+        The specific data associated with the item, obtained by the instrument of corresponding channel.
+        Must be one of the keys of the instrument data dict.
             The item will continuosly update the data in the way described by the instrument update_data() method.
-        action (str): The action to carry out when selecting the item.
-            Must be one of the actions foreseen by the instrument action() method.
-        text_before (str): A string to be printed before the main item text
-        text_after (str): A string to be printed after the main item text
-        value: The main content of the item, contains the value (or data structure) to be printed, updated, or modified as wished.
-        decimals (int): If displaying floats, determines how many decimals to show.
-        xycoords (Literal["prop", "int"]): Determines how to translate the x,y values into terminal screen coordinates 
-            - prop: coordinate system of the axes, x,y are floats between 0 and 1, (0, 0) is top left, and (1, 1) is top right. 
-            - int: exact column and row position, x,y, are ints.
-        halign (Literal["left", "center", "right"]): horizontal alignment of the item with respect to the x,y coordinates
-        valign (Literal["top", "center", "bottom"]): vertical alignment of the item with respect to the x,y coordinates
-        xoffset (int): number of columns, horizontal offset with respect to the x position.
-            Useful to group together groups of items.
-        yoffset (int): number of rows, vertical offset with respect to the y position.
-            Useful to group together groups of items.
+    action : str
+        The action to carry out when selecting the item.
+        Must be one of the actions foreseen by the instrument action() method.
+    text_before : str
+        A string to be printed before the main item text
+    text_after : str
+        A string to be printed after the main item text
+    value
+        The main content of the item, contains the value (or data structure) to be printed, updated, or modified as wished.
+    decimals : int
+        If displaying floats, determines how many decimals to show.
+    xycoords : Literal["prop", "int"]
+        Determines how to translate the x,y values into terminal screen coordinates:
+        **prop**: coordinate system of the axes, x,y are floats between 0 and 1, (0, 0) is top left, and (1, 1) is top right. 
+        **int**: exact column and row position, x,y, are ints.
+    halign : Literal["left", "center", "right"]
+        horizontal alignment of the item with respect to the x,y coordinates
+    valign : Literal["top", "center", "bottom"]
+        vertical alignment of the item with respect to the x,y coordinates
+    xoffset : int
+        number of columns, horizontal offset with respect to the x position.
+        Useful to group together groups of items.
+    yoffset : int
+        number of rows, vertical offset with respect to the y position.
+        Useful to group together groups of items.
     """
     navigable: bool = False
     editable: bool = False
@@ -86,10 +101,13 @@ class DashboardItem(ABC):
     def handle_edit_key(self, key) -> tuple[bool, Optional[float]]:
         """
         Determines what happens when a key is pressed while editing an item.
-        Returns a tuple (exit_editing, commit_value). 
 
-        If `exit_editing=True` the dashboard will get out of editing mode, and the item `action` will be called with the `commit_value` returned.
-        If `commit_value=None` the dahsboard will cancel the edit.
+        Returns
+        -------
+        tuple[bool, Optional[float]]
+            A tuple (exit_editing, commit_value). If ``exit_editing=True`` the dashboard will get out of editing mode, 
+            and the item ``action`` will be called with the ``commit_value`` returned.
+            If ``commit_value=None`` the dahsboard will cancel the edit.
         """
         pass
     
@@ -109,12 +127,17 @@ class DashboardItem(ABC):
         """
         Calculate the actual x, y position to draw the item on, based on coordinate system, horizontal and vertical alignment.
         
-        Args:
-            screen: The curses window object
-            text_length: Length of the considered text (for alignment calculations)
+        Parameters
+        ----------
+        screen : curses.window
+            The curses window object
+        text_length : int
+            Length of the considered text (for alignment calculations)
         
-        Returns:
-            tuple: (xpos, ypos) - the calculated screen coordinates
+        Returns
+        -------
+        tuple
+            (xpos, ypos) - the calculated screen coordinates
         """
         window_height, window_width = screen.getmaxyx()
         
@@ -158,13 +181,18 @@ class Label(DashboardItem):
     """
     A static, non-navigable and non-editable item, without associated data or action.
 
-    Args:
-        x: x position in dashboard. 
-            The way this value translates to a column of the terminal is decided by xycoords
-        y: y position in dashboard (higher y corresponds to a lower position). 
-            The way this value translates to a row of the terminal is decided by xycoords
-        text (str): The text to be printed
-        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
+    Parameters
+    ----------
+    x
+        x position in dashboard. 
+        The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). 
+        The way this value translates to a row of the terminal is decided by xycoords
+    text : str
+        The text to be printed
+    **kwargs
+        See :class:`DashboardItem` for the full list of accepted arguments.
     """
     def __init__(self, x, y, text: str, **kwargs):
         super().__init__(x, y, **kwargs)
@@ -181,23 +209,34 @@ class Switch(DashboardItem):
     """
     A dynamic, navigable, non-editable item, which alternates between two possible states.
 
-    Args:
-        x: x position in dashboard. 
-            The way this value translates to a column of the terminal is decided by xycoords
-        y: y position in dashboard (higher y corresponds to a lower position). 
-            The way this value translates to a row of the terminal is decided by xycoords
-        xgrid (int): If navigable, determines the x position of the item on the navigable grid
-        ygrid (int): If navigable, determines the y position of the item on the navigable grid
-        channel (int): A number associating the items with an instrument.
-            Enter a channel equal to the one set for the desired instrument for the two to communicate. 
-        data (str): The specific data associated with the item, obtained by the instrument of corresponding channel.
-            Must be one of the keys of the instrument data dict.
-            Must be of boolean nature.
+    Parameters
+    ----------
+    x
+        x position in dashboard. 
+        The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). 
+        The way this value translates to a row of the terminal is decided by xycoords
+    xgrid : int
+        If navigable, determines the x position of the item on the navigable grid
+    ygrid : int
+        If navigable, determines the y position of the item on the navigable grid
+    channel : int
+        A number associating the items with an instrument.
+        Enter a channel equal to the one set for the desired instrument for the two to communicate. 
+    data : str
+        The specific data associated with the item, obtained by the instrument of corresponding channel.
+        Must be one of the keys of the instrument data dict.
+        Must be of boolean nature.
             The item will continuosly update the data in the way described by the instrument update_data() method.
-        action (str): The action to carry out when the item switches between the two possible states.
-            Must be one of the actions foreseen by the instrument action() method.
-        initial_value (bool): The initial value stored in the item.
-        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
+    action : str
+        The action to carry out when the item switches between the two possible states.
+
+            Must be one of the actions foreseen by the instrument :obj:`action()` method.
+    initial_value : bool
+        The initial value stored in the item.
+    **kwargs
+        See :class:`DashboardItem` for the full list of accepted arguments.
     """
     navigable = True
     editable = False
@@ -235,20 +274,30 @@ class Readonly(DashboardItem):
     """
     A dynamic, non-navigable, non-editable item, which updates and prints data associated with an instrument.
 
-    Args:
-        x: x position in dashboard. 
-            The way this value translates to a column of the terminal is decided by xycoords
-        y: y position in dashboard (higher y corresponds to a lower position). 
-            The way this value translates to a row of the terminal is decided by xycoords
-        xgrid (int): If navigable, determines the x position of the item on the navigable grid
-        ygrid (int): If navigable, determines the y position of the item on the navigable grid
-        channel (int): A number associating the items with an instrument.
+    Parameters
+    ----------
+    x
+        x position in dashboard. 
+        The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). 
+        The way this value translates to a row of the terminal is decided by xycoords
+    xgrid : int
+        If navigable, determines the x position of the item on the navigable grid
+    ygrid : int
+        If navigable, determines the y position of the item on the navigable grid
+    channel : int
+        A number associating the items with an instrument.
+
             Enter a channel equal to the one set for the desired instrument for the two to communicate. 
-        data (str): The specific data associated with the item, obtained by the instrument of corresponding channel.
-            Must be one of the keys of the instrument data dict.
+    data : str
+        The specific data associated with the item, obtained by the instrument of corresponding channel.
+        Must be one of the keys of the instrument data dict.
             The item will continuosly update the data in the way described by the instrument update_data() method.
-        initial_value (bool): The initial value stored in the item.
-        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
+    initial_value : bool
+        The initial value stored in the item.
+    **kwargs
+        See :class:`DashboardItem` for the full list of accepted arguments.
     """
     def __init__(self, 
                  x, y,
@@ -277,22 +326,34 @@ class Editable(DashboardItem):
     """
     A dynamic, navigable, editable item, which sets, updates and prints data associated with an instrument.
 
-    Args:
-        x: x position in dashboard. 
-            The way this value translates to a column of the terminal is decided by xycoords
-        y: y position in dashboard (higher y corresponds to a lower position). 
-            The way this value translates to a row of the terminal is decided by xycoords
-        xgrid (int): If navigable, determines the x position of the item on the navigable grid
-        ygrid (int): If navigable, determines the y position of the item on the navigable grid
-        channel (int): A number associating the items with an instrument.
+    Parameters
+    ----------
+    x
+        x position in dashboard. 
+        The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). 
+        The way this value translates to a row of the terminal is decided by xycoords
+    xgrid : int
+        If navigable, determines the x position of the item on the navigable grid
+    ygrid : int
+        If navigable, determines the y position of the item on the navigable grid
+    channel : int
+        A number associating the items with an instrument.
+
             Enter a channel equal to the one set for the desired instrument for the two to communicate. 
-        data (str): The specific data associated with the item, obtained by the instrument of corresponding channel.
-            Must be one of the keys of the instrument data dict.
+    data : str
+        The specific data associated with the item, obtained by the instrument of corresponding channel.
+        Must be one of the keys of the instrument data dict.
             The item will continuosly update the data in the way described by the instrument update_data() method.
-        action (str): The action to carry out when selecting the item.
+    action : str
+        The action to carry out when selecting the item.
+
             Must be one of the actions foreseen by the instrument action() method.
-        initial_value (bool): The initial value stored in the item.
-        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
+    initial_value : bool
+        The initial value stored in the item.
+    **kwargs
+        See :class:`DashboardItem` for the full list of accepted arguments.
     """
     navigable = True
     editable = True
@@ -365,20 +426,30 @@ class Light(DashboardItem):
     """
     A dynamic, non-navigable, non-editable item, which updates boolean data associated with an instrument and represents it with a green (True) or red (False) circle in a single character.
 
-    Args:
-        x: x position in dashboard. 
-            The way this value translates to a column of the terminal is decided by xycoords
-        y: y position in dashboard (higher y corresponds to a lower position). 
-            The way this value translates to a row of the terminal is decided by xycoords
-        xgrid (int): If navigable, determines the x position of the item on the navigable grid
-        ygrid (int): If navigable, determines the y position of the item on the navigable grid
-        channel (int): A number associating the items with an instrument.
+    Parameters
+    ----------
+    x
+        x position in dashboard. 
+        The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). 
+        The way this value translates to a row of the terminal is decided by xycoords
+    xgrid : int
+        If navigable, determines the x position of the item on the navigable grid
+    ygrid : int
+        If navigable, determines the y position of the item on the navigable grid
+    channel : int
+        A number associating the items with an instrument.
+
             Enter a channel equal to the one set for the desired instrument for the two to communicate. 
-        data (str): The specific data associated with the item, obtained by the instrument of corresponding channel.
-            Must be one of the keys of the instrument data dict.
+    data : str
+        The specific data associated with the item, obtained by the instrument of corresponding channel.
+        Must be one of the keys of the instrument data dict.
             The item will continuosly update the data in the way described by the instrument update_data() method.
-        initial_value (bool): The initial value stored in the item.
-        **kwargs: See :class:`DashboardItem` for the full list of accepted arguments.
+    initial_value : bool
+        The initial value stored in the item.
+    **kwargs
+        See :class:`DashboardItem` for the full list of accepted arguments.
     """
     def __init__(self, 
                  x, y,

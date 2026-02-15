@@ -15,24 +15,41 @@ class Dashboard:
     The Dashboard runs a background thread to periodically call :obj:`.Instrument.update_data()`
     and places new values into an internal queue that the main drawing loop consumes.
 
-    Args:
-        screen: curses screen object supplied by ``curses.wrapper``.
-        data_update_interval (float): In seconds, interval between instrument polls.
-            More precisely, interval between the moment when the last instrument has updated and the next polling starts.
-        data_update_workers (int): The maximum number of instruments updating at the same time. Defaults to the maximum number of workers which can be assigned by the system.
-        cycle (bool): Whether the grid allows cycling, i.e. navigating between the first and the last element of a line/column.
-        header (str): A string continuously printed on the top left of the dashboard.
-        show_time (bool): Whether to show the current time on the top of the dashboard.
-        show_log (bool): Whether to show the last :obj:`max_log_messages` logs at the bottom of the dashboard.
-        show_controls (bool): Whether to show the controls help text (:obj:`controls_text`) in a section of the dashboard.
-        controls_text (list[str] | None): The text detailing the dashboard controls.
-        grid_start (tuple[int,int]): The position the item selector starts in at the launch of the program.
-        max_log_messages (int): Maximum number of log messages to be shown at once.
+    Parameters
+    ----------
+    screen
+        curses screen object supplied by ``curses.wrapper``.
+    data_update_interval : float
+        In seconds, interval between instrument polls.
+        More precisely, interval between the moment when the last instrument has updated and the next polling starts.
+    data_update_workers : int
+        The maximum number of instruments updating at the same time. Defaults to the maximum number of workers which can be assigned by the system.
+    cycle : bool
+        Whether the grid allows cycling, i.e. navigating between the first and the last element of a line/column.
+    header : str
+        A string continuously printed on the top left of the dashboard.
+    show_time : bool
+        Whether to show the current time on the top of the dashboard.
+    show_log : bool
+        Whether to show the last :obj:`max_log_messages` logs at the bottom of the dashboard.
+    show_controls : bool
+        Whether to show the controls help text (:obj:`controls_text`) in a section of the dashboard.
+    controls_text : list[str] | None
+        The text detailing the dashboard controls.
+    grid_start : tuple[int,int]
+        The position the item selector starts in at the launch of the program.
+    max_log_messages : int
+        Maximum number of log messages to be shown at once.
 
-    Attributes:
-        instruments (dict[int, Instrument]): Instruments keyed by channel.
-        items (list[DashboardItem]): All dashboard items.
+    Attributes
+    ----------
+    instruments : dict[int, Instrument]
+        Instruments keyed by channel.
+    items : list[DashboardItem]
+        All dashboard items.
 
+    Notes
+    -----
     Threading / lifecycle:
         - `Dashboard.__init__` starts a daemon thread that runs `_update_data_loop`.
         - `run()` is the main thread's drawing loop; it consumes the data queue.
@@ -40,15 +57,16 @@ class Dashboard:
             Once all the instruments have been updated, after `data_update_interval` seconds another update is called for all instruments.
             Exceptions are caught and logged.
 
-    Example:
-        >>> def main(stdscr):
-        ...     dash = Dashboard(stdscr, header="LabTerm example")
-        ...     dash.add_instruments(MyInstrument(channel=0))
-        ...     dash.add_items(MyDashboardItem(...))
-        ...     dash.run()...   
-        ... if __name__ == '__main__':
-        ...     import curses
-        ...     curses.wrapper(main)
+    Examples
+    --------
+    >>> def main(stdscr):
+    ...     dash = Dashboard(stdscr, header="LabTerm example")
+    ...     dash.add_instruments(MyInstrument(channel=0))
+    ...     dash.add_items(MyDashboardItem(...))
+    ...     dash.run()...   
+    ... if __name__ == '__main__':
+    ...     import curses
+    ...     curses.wrapper(main)
 
     """
     DEFAULT_CONTROLS = [
@@ -124,8 +142,10 @@ class Dashboard:
         Each instrument is connected to the dashboard's logger and registered
         by its channel ID. Instruments with duplicate channel IDs will overwrite previous ones.
 
-        Args:
-            *instruments: Variable number of Instrument instances to add.
+        Parameters
+        ----------
+        *instruments
+            Variable number of Instrument instances to add.
         """
         for new in instruments:
             new.logger = self._log
@@ -138,8 +158,10 @@ class Dashboard:
         Items are drawn in the order they are added. Navigable items form a grid
         based on their xgrid and ygrid coordinates.
 
-        Args:
-            *items: Variable number of DashboardItem instances to add.
+        Parameters
+        ----------
+        *items
+            Variable number of DashboardItem instances to add.
         """
         for new in items:
             self.items.append(new)
@@ -218,17 +240,16 @@ class Dashboard:
         """
         Background loop that polls instruments (in separate threads) and queues updated values.
 
+        Notes
+        -----
         Behavior:
             1. Iterates over `self._instruments` and calls `instrument.update_data()` with a ThreadPoolExectuor.
             2. As the instruments complete the data update, asynchronously puts a list of the updated `(item, new_value)` tuples into `self._data_queue`.
             3. Once all the instruments have completed the data update, sleep interval controlled by `self._data_update_interval`, then start again.
 
-        Notes:
-            - Consumers (the main thread) should only access item.value from the main thread to avoid race conditions.
-            - There is currently a timeout of 60 seconds set for the instrument data update.
-
-        Raises:
-            Exceptions are caught and logged via `self._log`.
+        - Consumers (the main thread) should only access item.value from the main thread to avoid race conditions.
+        - There is currently a timeout of 60 seconds set for the instrument data update.
+        - Exceptions are caught and logged via `self._log`.
         """
         executor = ThreadPoolExecutor(max_workers=self._data_update_workers)
         while self._running:
@@ -333,12 +354,17 @@ class Dashboard:
         """
         Get item at grid position.
     
-        Args:
-            x: Grid x coordinate
-            y: Grid y coordinate
+        Parameters
+        ----------
+        x : int
+            Grid x coordinate
+        y : int
+            Grid y coordinate
             
-        Returns:
-            (index, item): or None if not found
+        Returns
+        ------
+        tuple[int, DashboardItem] or None
+            (index, item) or None if not found
         """
         for idx, item in enumerate(self.items):
             if item.navigable and item.xgrid == x and item.ygrid == y:
