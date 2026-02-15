@@ -30,9 +30,8 @@ class Dashboard:
         max_log_messages (int): Maximum number of log messages to be shown at once.
 
     Attributes:
-        _instruments (dict[int, Instrument]): Instruments keyed by channel.
-        _items (list[DashboardItem]): All dashboard items.
-        _running (bool): True while dashboard main loop is running.
+        instruments (dict[int, Instrument]): Instruments keyed by channel.
+        items (list[DashboardItem]): All dashboard items.
 
     Threading / lifecycle:
         - `Dashboard.__init__` starts a daemon thread that runs `_update_data_loop`.
@@ -99,8 +98,8 @@ class Dashboard:
         self._log_messages: list[str] = []
 
         # Dashboard data structures
-        self._instruments: dict[int, Instrument] = {}
-        self._items: list[DashboardItem] = []
+        self.instruments: dict[int, Instrument] = {}
+        self.items: list[DashboardItem] = []
 
         # Initialize curses settings
         curses.curs_set(0)  # Hide cursor
@@ -130,7 +129,7 @@ class Dashboard:
         """
         for new in instruments:
             new.logger = self._log
-            self._instruments.update({new.channel : new})
+            self.instruments.update({new.channel : new})
     
     def add_items(self, *items : DashboardItem) -> None:
         """
@@ -143,7 +142,7 @@ class Dashboard:
             *items: Variable number of DashboardItem instances to add.
         """
         for new in items:
-            self._items.append(new)
+            self.items.append(new)
 
     def cycle(self, cycle: bool = True):
         """
@@ -173,7 +172,7 @@ class Dashboard:
                 # Draw all items, logs and decorators
                 self._draw_header()
 
-                for i, item in enumerate(self._items):
+                for i, item in enumerate(self.items):
                     selected = (item.xgrid == self._current_grid_x and item.ygrid == self._current_grid_y) if item.navigable else False
                     item.draw(self._screen, selected=selected)
                 
@@ -235,11 +234,11 @@ class Dashboard:
         while self._running:
             try:
                 future_to_items = {} # keys are futures, values are list of items
-                for channel, instrum in self._instruments.items():
+                for channel, instrum in self.instruments.items():
                     future = executor.submit(instrum.update_data)
                     if future not in future_to_items:
                         future_to_items[future] = []
-                    for item in self._items:
+                    for item in self.items:
                         if item.channel==channel and item.data is not None:
                             future_to_items[future].append(item)
 
@@ -248,7 +247,7 @@ class Dashboard:
                         future.result()
                         instrument_updates = []
                         for item in future_to_items[future]:
-                            instrument = self._instruments[item.channel]
+                            instrument = self.instruments[item.channel]
                             new_value = instrument.data.get(item.data)
                             if new_value is not None:
                                 instrument_updates.append((item, new_value))
@@ -341,7 +340,7 @@ class Dashboard:
         Returns:
             (index, item): or None if not found
         """
-        for idx, item in enumerate(self._items):
+        for idx, item in enumerate(self.items):
             if item.navigable and item.xgrid == x and item.ygrid == y:
                     return idx, item
         return None
@@ -372,14 +371,14 @@ class Dashboard:
             self._editing = False
             item.exit_edit()
             if value is not None:
-                instrument = self._instruments[item.channel]
+                instrument = self.instruments[item.channel]
                 instrument.action(item.action, value)
             
         return True
     
     def _handle_navigation_input(self, key):
         """Handle navigation input and turning switches on/off"""
-        navigable_items = [item for item in self._items if item.navigable]
+        navigable_items = [item for item in self.items if item.navigable]
         if not navigable_items:
             # Handle global keys even without navigable items
             if key == ord('i'):
@@ -434,7 +433,7 @@ class Dashboard:
                         f"missing channel or action"
                     )
                 else:
-                    instrument = self._instruments[item.channel]
+                    instrument = self.instruments[item.channel]
                     if instrument:
                         instrument.action(item.action)
                     else:
