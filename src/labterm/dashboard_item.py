@@ -235,6 +235,8 @@ class Switch(DashboardItem):
             Must be one of the actions foreseen by the instrument :obj:`action()` method.
     initial_value : bool
         The initial value stored in the item.
+    text : tuple[str,str]
+        The text shown in the two different states of the switch. Defaults to ("ON", "OFF")
     **kwargs
         See :class:`DashboardItem` for the full list of accepted arguments.
     """
@@ -269,6 +271,61 @@ class Switch(DashboardItem):
             color |= curses.A_REVERSE
         screen.addstr(ypos, xpos, text, color)
 
+class Button(DashboardItem):
+    """
+    An interactive, navigable, non-editable item, which executes a single action when pressed.
+
+    Parameters
+    ----------
+    x
+        x position in dashboard. 
+        The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). 
+        The way this value translates to a row of the terminal is decided by xycoords
+    xgrid : int
+        If navigable, determines the x position of the item on the navigable grid
+    ygrid : int
+        If navigable, determines the y position of the item on the navigable grid
+    channel : int
+        A number associating the items with an instrument.
+        Enter a channel equal to the one set for the desired instrument for the two to communicate. 
+    action : str
+        The action to carry out when the item is pressed.
+
+            Must be one of the actions foreseen by the instrument :obj:`action()` method.
+    text : str
+        The text shown when printing the button
+    **kwargs
+        See :class:`DashboardItem` for the full list of accepted arguments.
+    """
+    navigable = True
+    editable = False
+    def __init__(
+        self, 
+        x, y, 
+        xgrid: int, ygrid: int,
+        channel: int, 
+        action: str, 
+        text:str,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            x, y, 
+            xgrid=xgrid, ygrid=ygrid, 
+            channel=channel, action=action,
+            **kwargs
+        )
+        self.text = text
+    
+    def draw(self, screen: curses.window, selected):
+        state_text = f"[{self.text}]"
+        text = self.text_before + state_text + self.text_after
+        xpos, ypos = self._calculate_position(screen, len(text))
+        color = curses.color_pair(0)
+        if selected:
+            color |= curses.A_REVERSE
+        screen.addstr(ypos, xpos, text, color)
 
 class Readonly(DashboardItem):
     """
@@ -347,7 +404,8 @@ class Editable(DashboardItem):
         Must be one of the keys of the instrument data dict.
             The item will continuosly update the data in the way described by the instrument update_data() method.
     action : str
-        The action to carry out when selecting the item.
+        The action to carry out **after** the item value was edited (i.e. when pressing enter again after having edited the item).
+        Typically indicates what should the Instrument do with the new value.
 
             Must be one of the actions foreseen by the instrument action() method.
     initial_value : bool
@@ -425,6 +483,8 @@ class Editable(DashboardItem):
 class Light(DashboardItem):
     """
     A dynamic, non-navigable, non-editable item, which updates boolean data associated with an instrument and represents it with a green (True) or red (False) circle in a single character.
+
+    Analogous to a non-interactive :class:`Switch`
 
     Parameters
     ----------
