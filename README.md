@@ -13,11 +13,19 @@ It's designed to be as modular as possible: if some functionality you need is mi
 
 
 ## Installation
-Clone this repository anywhere in your computer by running `git clone https://github.com/mVenez/labterm.git`, then navigate to the repository root directory and install it by running `python -m pip install .`.
+Clone the repository anywhere in your computer by running 
+```
+git clone https://github.com/mVenez/labterm.git
+```
+then navigate to the repository root directory and install it by running 
+```
+python3 -m pip install .
+```
+This will install the library in whatever environment you're in, and you will be able to `import labterm` in your programs.
 
 
 ## Use
-It's easier to understand the library by seeing it in action in the examples provided. What follows is the general scheme to follow when you want to create a dashboard from scratch. Check out the documentation for more information on how to use the different components.
+It's easier to understand the library by seeing it in action in the **examples** provided (`examples/`). What follows is the general scheme to follow when you want to create a dashboard from scratch. Check out the [documentation](https://mvenez.github.io/labterm/) for more information on how to use the different components.
 
 To create your own dashboard you need to:
 1. Define one or more subclasses of `Instrument`, which represent the instrument/system you want to interface on. The subclass must contain

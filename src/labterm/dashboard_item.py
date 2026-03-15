@@ -5,8 +5,9 @@ from abc import ABC, abstractmethod
 
 class DashboardItem(ABC):
     """
-    An item drawable on the dashboard, associated with a measured quantity or a state of a specific instrument.
-
+    Abstract Base Class for all items drawable on the dashboard, associated with a measured quantity or a state of a specific instrument.
+    
+    
     Parameters
     ----------
     x

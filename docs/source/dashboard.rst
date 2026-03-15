@@ -1,4 +1,6 @@
-.. automodule:: labterm.dashboard
+Dashboard
+=========
+
+.. autoclass:: labterm.dashboard.Dashboard
    :members:
-   :show-inheritance:
    :undoc-members:

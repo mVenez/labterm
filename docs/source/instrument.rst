@@ -1,3 +1,5 @@
+Instrument
+==========
 .. automodule:: labterm.instrument
    :members:
    :show-inheritance:
