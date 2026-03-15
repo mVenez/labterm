@@ -35,10 +35,12 @@ class DashboardItem(ABC):
         The main content of the item, contains the value (or data structure) to be printed, updated, or modified as wished.
     decimals : int
         If displaying floats, determines how many decimals to show.
-    xycoords : Literal["prop", "int"]
+    xycoords : Literal["prop", "fixed", "xprop", "yprop"]
         Determines how to translate the x,y values into terminal screen coordinates:
         **prop**: coordinate system of the axes, x,y are floats between 0 and 1, (0, 0) is top left, and (1, 1) is top right. 
-        **int**: exact column and row position, x,y, are ints.
+        **fixed**: exact column and row position, x,y, are ints.
+        **xprop**: prop for the x axis, fixed for the y axis
+        **yprop**: prop for the y axis, fixed for the x axis
     halign : Literal["left", "center", "right"]
         horizontal alignment of the item with respect to the x,y coordinates
     valign : Literal["top", "center", "bottom"]
@@ -142,14 +144,18 @@ class DashboardItem(ABC):
         window_height, window_width = screen.getmaxyx()
         
         # Convert coordinates to absolute screen positions
-        if self.xycoords == "int":
+        if self.xycoords == "fixed":
             xpos, ypos = int(self.x), int(self.y)
         elif self.xycoords == "prop":
             xpos, ypos = int(self.x * window_width), int(self.y * window_height)
+        elif self.xycoords == "xprop":
+            xpos, ypos = int(self.x * window_width), int(self.y)
+        elif self.xycoords == "yprop":
+            xpos, ypos = int(self.x), int(self.y * window_height)
         else:
             raise ValueError(
                 f"Invalid coordinate system '{self.xycoords}'. "
-                f"Must be 'int' or 'prop'."
+                f"Must be 'fixed', 'prop', 'xprop' or 'yprop'."
             )
         
         # Apply horizontal alignment
@@ -535,3 +541,38 @@ class Light(DashboardItem):
             screen.addstr(ypos, xpos, text, curses.color_pair(3))
         else:
             screen.addstr(ypos, xpos, text, curses.color_pair(4))
+
+
+class Header(DashboardItem):
+    """
+    Decorator: a static, non-navigable and non-editable item, without associated data or action.
+    Prints a window-wide line at the desired height, optionally containing a text/title.
+
+    Parameters
+    ----------
+    x
+        x position of the header text in dashboard. 
+        The way this value translates to a column of the terminal is decided by xycoords
+    y
+        y position in dashboard (higher y corresponds to a lower position). 
+        The way this value translates to a row of the terminal is decided by xycoords
+    text : str
+        The text to be printed
+    **kwargs
+        See :class:`DashboardItem` for the full list of accepted arguments.
+    """
+    def __init__(self, x, y, text: str = '', **kwargs):
+        super().__init__(x, y, **kwargs)
+        self.value = text
+
+    def draw(self, screen: curses.window, **kwargs):
+        text = self.text_before + self.value + self.text_after
+        xpos, ypos = self._calculate_position(screen, len(self.value))
+        window_height, window_width = screen.getmaxyx()
+
+        if text == '':
+            screen.hline(ypos, 0, curses.ACS_HLINE, window_width, curses.color_pair(1))
+        else:
+            screen.hline(ypos, 0, curses.ACS_HLINE, xpos-1, curses.color_pair(1))
+            screen.addstr(ypos, xpos, text, curses.A_BOLD | curses.color_pair(1))
+            screen.hline(ypos, xpos + len(text)+1, curses.ACS_HLINE, window_width, curses.color_pair(1))

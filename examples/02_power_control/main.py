@@ -35,6 +35,8 @@ def main(stdscr):
 
     # Define and add the Items
     dashboard.add_items(*[
+        lt.Header(x=4, y=rows[0], yoffset=-1, text="System", xycoords='yprop'),
+
         lt.Label(x=columns[0], y=rows[1], text='Power #1'),
         lt.Label(x=columns[0], y=rows[2], text='Power #2'),
         lt.Label(x=columns[1], y=rows[0], text="State"),

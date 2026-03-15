@@ -28,12 +28,12 @@ def main(stdscr) -> None:
     # === EXTRA ===
     # You could try and position the text differently. Try uncommenting these following lines:
     # dashboard.add_items(
-    #     lt.Label(x=1, y=6, xycoords='int',
+    #     lt.Label(x=1, y=6, xycoords='fixed',
     #              text="Hello, World! (the return)", )
     #     # Here we've chosen an exact row and column to print the text to
     #     )
     # dashboard.add_items(
-    #     lt.Label(x=18, y=8, xycoords='int', halign='center',
+    #     lt.Label(x=18, y=8, xycoords='fixed', halign='center',
     #              text="Hello, World! (hello again)")
     #     # Here we've chosen to center the text horizontally
     #     )
