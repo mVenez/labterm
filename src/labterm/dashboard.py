@@ -67,10 +67,10 @@ class Dashboard:
     ...     curses.wrapper(main)
 
     """
-    DEFAULT_CONTROLS = [
-                    "↑/↓/←/→ - Navigate items               i - Invert colors",
-                    "Enter - Toggle switch / Edit value     Numbers - Enter values (when editing)",
-                    "Esc - Cancel edit                      q - Quit"
+    DEFAULT_CONTROLS = [ 
+                    "↑/↓/←/→ - Navigate items                 Esc - Cancel edit",
+                    "Enter - Toggle switch / Edit value       h - Hide controls    l - Hide logs",
+                    "Numbers - Enter values (when editing)    i - Invert colors    q - Quit",
                     ]
     
     def __init__(
@@ -236,7 +236,10 @@ class Dashboard:
         self._data_update_interval = interval
 
     def show_controls(self, show:bool) -> None:
-        """Sets whether the dashboard controls are printed or not on the dashboard."""
+        """
+        Sets whether the dashboard controls are printed or not on the dashboard.
+        They can be toggled on and off by pressing the h key.
+        """
         self._show_controls = show
 
     def show_log(self, show:bool) -> None:
@@ -315,7 +318,7 @@ class Dashboard:
     def _draw_controls(self):
         """Draw control instructions"""
         window_height, window_width = self._screen.getmaxyx()
-        start_y = window_height - self._max_log_messages - len(self._controls_text) - 1
+        start_y = window_height - (self._max_log_messages if self._show_log else -1) - len(self._controls_text) - 1
 
         self._draw_sectiontitle("Controls", start_y - 1)
         for i, line in enumerate(self._controls_text):
@@ -466,6 +469,12 @@ class Dashboard:
             self._inverted_colors = not self._inverted_colors
             self._init_colors()
             self._screen.bkgd(' ', curses.color_pair(1))
+
+        elif key == ord('h'):
+            self._show_controls = not self._show_controls
+
+        elif key == ord('l'):
+            self._show_log = not self._show_log
 
         elif key == ord('q'):
             return False
