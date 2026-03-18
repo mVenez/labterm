@@ -11,7 +11,6 @@ from .dashboard_item import (
 )
 from .instrument import Instrument
 
-__version__ = "1.1.0"
 __all__ = [
     "Dashboard",
     "DashboardItem",
