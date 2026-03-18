@@ -26,12 +26,11 @@ class ServerTester(Instrument):
             "Pings the ip address associated with the server and sets the online status of the object based on the output"
             try:
                 self._log(f"Pinging")
-                output = subprocess.run(["ping", "-c", "1", self.address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                if output.returncode == 0:
-                    self.data['online'] = True
-                else:
-                    self.data['online'] = False
-            except subprocess.CalledProcessError:
+                output = subprocess.run(["ping", "-c", "1", self.address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
+
+                self.data['online'] = output.returncode == 0
+
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 # self._log(f"Error")
                 self.data['online'] = False
 
