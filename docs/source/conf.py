@@ -40,7 +40,7 @@ napoleon_numpy_docstring = True
 napoleon_use_ivar = True
 add_module_names = True
 autosummary_generate = True
-
+autodoc_class_signature = "separated"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

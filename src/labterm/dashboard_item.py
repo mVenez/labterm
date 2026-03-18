@@ -186,7 +186,10 @@ class DashboardItem(ABC):
 
 class Label(DashboardItem):
     """
-    A static, non-navigable and non-editable item, without associated data or action.
+    Static text label.
+     
+    A non-interactive display element, for headers, row/column labels, and annotations. 
+    Does not respond to user input or update from instrument data.
 
     Parameters
     ----------
@@ -214,7 +217,10 @@ class Label(DashboardItem):
 
 class Switch(DashboardItem):
     """
-    A dynamic, navigable, non-editable item, which alternates between two possible states.
+    Toggle switch for boolean instrument states.
+    
+    An interactive control that displays and toggles between two states (e.g., ON/OFF, ENABLED/DISABLED). 
+    Pressing Enter while selected inverts the state and triggers the associated instrument action.
 
     Parameters
     ----------
@@ -280,8 +286,11 @@ class Switch(DashboardItem):
 
 class Button(DashboardItem):
     """
-    An interactive, navigable, non-editable item, which executes a single action when pressed.
+    Single-action button.
 
+    An interactive control that executes an instrument action when activated.
+    Unlike switches, buttons do not maintain state — they simply trigger an action when pressed.
+    
     Parameters
     ----------
     x
@@ -336,7 +345,9 @@ class Button(DashboardItem):
 
 class Readonly(DashboardItem):
     """
-    A dynamic, non-navigable, non-editable item, which updates and prints data associated with an instrument.
+    Read-only numeric display.
+
+    A live display that continuously updates from instrument data but cannot be edited by the user. Useful for measurements, status values, and computed results.
 
     Parameters
     ----------
@@ -388,7 +399,11 @@ class Readonly(DashboardItem):
 
 class Editable(DashboardItem):
     """
-    A dynamic, navigable, editable item, which sets, updates and prints data associated with an instrument.
+    Editable numeric input field.
+
+    An interactive control for setting numeric instrument parameters. 
+    Press Enter to enter edit mode, type a value, then press Enter again to commit (or Escape to cancel). 
+    The committed value is sent to the instrument via the specified action.
 
     Parameters
     ----------
@@ -489,9 +504,11 @@ class Editable(DashboardItem):
         
 class Light(DashboardItem):
     """
-    A dynamic, non-navigable, non-editable item, which updates boolean data associated with an instrument and represents it with a green (True) or red (False) circle in a single character.
+    Boolean status indicator.
 
-    Analogous to a non-interactive :class:`Switch`
+    A visual indicator that displays instrument boolean data as a colored circle:
+    green (●) for True, red (●) for False. 
+    Non-interactive, use :class:`Switch` if you need user control.
 
     Parameters
     ----------
@@ -546,8 +563,10 @@ class Light(DashboardItem):
 
 class Header(DashboardItem):
     """
-    Decorator: a static, non-navigable and non-editable item, without associated data or action.
-    Prints a window-wide line at the desired height, optionally containing a text/title.
+    Horizontal divider with optional title.
+
+    A decorative element that draws a window-wide horizontal line, optionally containing centered or positioned text. 
+    Useful for visually separating dashboard sections.
 
     Parameters
     ----------
