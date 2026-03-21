@@ -127,6 +127,8 @@ class Dashboard:
         
         # Start data update queue
         self._data_queue: queue.Queue = queue.Queue()
+
+        self._key_press = False
     
 
     def add_instruments(self, *instruments: Instrument) -> None:
@@ -202,8 +204,11 @@ class Dashboard:
                 self._draw_header()
 
                 for i, item in enumerate(self.items):
+
                     selected = (item.xgrid == self._current_grid_x and item.ygrid == self._current_grid_y) if item.navigable else False
-                    item.draw(self._screen, selected=selected)
+                    pressed = selected and self._key_press
+                    item.draw(self._screen, selected=selected, pressed=pressed)
+                    if pressed: self._key_press = False
                 
                 if self._show_controls:
                     self._draw_controls()
@@ -461,6 +466,7 @@ class Dashboard:
                     instrument = self.instruments[item.channel]
                     if instrument:
                         instrument.action(item.action)
+                        self._key_press = True
                     else:
                         self._log(f"No instrument found for channel {item.channel}")
 

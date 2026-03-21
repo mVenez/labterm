@@ -92,7 +92,7 @@ class DashboardItem(ABC):
         self.yoffset = yoffset
 
     @abstractmethod
-    def draw(self, screen: curses.window, selected: bool = False) -> None:
+    def draw(self, screen: curses.window, selected: bool = False, pressed: bool = False) -> None:
         """
         Draw the item on the screen
         """
@@ -275,12 +275,12 @@ class Switch(DashboardItem):
         )
         self.text = text
     
-    def draw(self, screen: curses.window, selected):
+    def draw(self, screen: curses.window, selected, pressed):
         state_text = f"[{self.text[0]}]" if self.value else f"[{self.text[1]}]"
         text = self.text_before + state_text + self.text_after
         color = curses.color_pair(3) if self.value else curses.color_pair(4)
         xpos, ypos = self._calculate_position(screen, len(text))
-        if selected:
+        if selected and not pressed:
             color |= curses.A_REVERSE
         screen.addstr(ypos, xpos, text, color)
 
@@ -334,12 +334,12 @@ class Button(DashboardItem):
         )
         self.text = text
     
-    def draw(self, screen: curses.window, selected):
+    def draw(self, screen: curses.window, selected, pressed):
         state_text = f"[{self.text}]"
         text = self.text_before + state_text + self.text_after
         xpos, ypos = self._calculate_position(screen, len(text))
         color = curses.color_pair(0)
-        if selected:
+        if selected and not pressed:
             color |= curses.A_REVERSE
         screen.addstr(ypos, xpos, text, color)
 
