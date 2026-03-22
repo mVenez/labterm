@@ -457,7 +457,7 @@ class Editable(DashboardItem):
         self._edit_buffer = initial_value
         self._editing = False
 
-    def draw(self, screen: curses.window, selected: bool):
+    def draw(self, screen: curses.window, selected: bool, **kwargs):
         value_str = f"{self.value:.{self.decimals}f}"
         text = self.text_before + value_str + self.text_after
         xpos, ypos = self._calculate_position(screen, len(text))
