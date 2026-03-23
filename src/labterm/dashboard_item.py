@@ -126,7 +126,7 @@ class DashboardItem(ABC):
         """
         pass
 
-    def _calculate_position(self, screen: curses.window, text_length: int = 0):
+    def _calculate_position(self, screen: curses.window, text: str):
         """
         Calculate the actual x, y position to draw the item on, based on coordinate system, horizontal and vertical alignment.
         
@@ -134,8 +134,8 @@ class DashboardItem(ABC):
         ----------
         screen : curses.window
             The curses window object
-        text_length : int
-            Length of the considered text (for alignment calculations)
+        text : str
+            The text that will be printed by the item
         
         Returns
         -------
@@ -143,6 +143,9 @@ class DashboardItem(ABC):
             (xpos, ypos) - the calculated screen coordinates
         """
         window_height, window_width = screen.getmaxyx()
+        lines = text.splitlines()
+        nb_lines = len(lines)
+        max_width = max(len(line) for line in lines)
         
         # Convert coordinates to absolute screen positions
         if self.xycoords == "fixed":
@@ -163,13 +166,21 @@ class DashboardItem(ABC):
         if self.halign == "left":
             pass
         elif self.halign == "center":
-            xpos -= text_length // 2
+            xpos -= max_width // 2
         elif self.halign == "right":
-            xpos -= (text_length - 1)
+            xpos -= (max_width - 1)
         else:
-            raise Exception("DashboardItem: Unknown horizontal alignment blabla")
+            raise Exception("DashboardItem: Unknown horizontal alignment (possible options are 'left', 'center', 'right')")
         
-        # TODO: Apply vertical alignment
+        # Apply vertical alignment
+        if self.valign == "top":
+            pass
+        elif self.valign == "center":
+            ypos -= nb_lines // 2
+        elif self.valign == "bottom":
+            ypos -= nb_lines
+        else:
+            raise Exception("DashboardItem: Unknown vertical alignment (possible options are 'top', 'center', 'bottom')")
         
         # Apply offsets
         xpos += self.xoffset
@@ -178,8 +189,13 @@ class DashboardItem(ABC):
         # Clamp to valid screen boundaries
         if xpos < 0:
             xpos = 0
+        elif (xpos + max_width) > window_width:
+            xpos = window_width - max_width
+
         if ypos < 0:
             ypos = 0
+        elif (ypos + nb_lines) > window_height:
+            ypos = window_height - nb_lines
         
         return xpos, ypos
 
@@ -210,7 +226,7 @@ class Label(DashboardItem):
 
     def draw(self, screen: curses.window, **kwargs):
         text = self.text_before + self.value + self.text_after
-        xpos, ypos = self._calculate_position(screen, len(self.value))
+        xpos, ypos = self._calculate_position(screen, text)
         screen.addstr(ypos, xpos, text, curses.A_BOLD | curses.color_pair(1))
 
 
@@ -279,7 +295,7 @@ class Switch(DashboardItem):
         state_text = f"[{self.text[0]}]" if self.value else f"[{self.text[1]}]"
         text = self.text_before + state_text + self.text_after
         color = curses.color_pair(3) if self.value else curses.color_pair(4)
-        xpos, ypos = self._calculate_position(screen, len(text))
+        xpos, ypos = self._calculate_position(screen, text)
         if selected and not pressed:
             color |= curses.A_REVERSE
         screen.addstr(ypos, xpos, text, color)
@@ -337,7 +353,7 @@ class Button(DashboardItem):
     def draw(self, screen: curses.window, selected, pressed):
         state_text = f"[{self.text}]"
         text = self.text_before + state_text + self.text_after
-        xpos, ypos = self._calculate_position(screen, len(text))
+        xpos, ypos = self._calculate_position(screen, text)
         color = curses.color_pair(0)
         if selected and not pressed:
             color |= curses.A_REVERSE
@@ -393,7 +409,7 @@ class Readonly(DashboardItem):
         else:
             value_str = f"{self.value:.{self.decimals}f}"
         text = self.text_before + value_str + self.text_after
-        xpos, ypos = self._calculate_position(screen, len(text))
+        xpos, ypos = self._calculate_position(screen, text)
         screen.addstr(ypos, xpos, text)
 
 
@@ -460,7 +476,7 @@ class Editable(DashboardItem):
     def draw(self, screen: curses.window, selected: bool, **kwargs):
         value_str = f"{self.value:.{self.decimals}f}"
         text = self.text_before + value_str + self.text_after
-        xpos, ypos = self._calculate_position(screen, len(text))
+        xpos, ypos = self._calculate_position(screen, text)
         color = curses.color_pair(1)
         if self._editing:
             text = str(self._edit_buffer)
@@ -554,7 +570,7 @@ class Light(DashboardItem):
         else:
             value_str =  "●"
         text = self.text_before + value_str + self.text_after
-        xpos, ypos = self._calculate_position(screen, len(text))
+        xpos, ypos = self._calculate_position(screen, text)
         if self.value:
             screen.addstr(ypos, xpos, text, curses.color_pair(3))
         else:
@@ -587,7 +603,7 @@ class Header(DashboardItem):
 
     def draw(self, screen: curses.window, **kwargs):
         text = self.text_before + self.value + self.text_after
-        xpos, ypos = self._calculate_position(screen, len(self.value))
+        xpos, ypos = self._calculate_position(screen, text)
         window_height, window_width = screen.getmaxyx()
 
         if text == '':
