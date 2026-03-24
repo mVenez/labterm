@@ -178,7 +178,7 @@ class DashboardItem(ABC):
         elif self.valign == "center":
             ypos -= nb_lines // 2
         elif self.valign == "bottom":
-            ypos -= nb_lines
+            ypos -= (nb_lines-1)
         else:
             raise Exception("DashboardItem: Unknown vertical alignment (possible options are 'top', 'center', 'bottom')")
         
