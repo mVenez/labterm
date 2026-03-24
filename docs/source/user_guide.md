@@ -115,4 +115,38 @@ Among these:
 
 
 ## Custom Dashboard Items
+It's easy to define custom items if the ones contained in the library are not suited for a specific feature you want in your dashboard.
+
+If you're not sure how to draw something on the dashboard you can check the [curses documentation](https://docs.python.org/3/library/curses.html#module-curses).
+
+### Minimal example
+```python
+class MinimalItem(lt.DashboardItem):
+"""
+A simple dashboard item whose 'value' is constantly updated and printed.
+"""
+def __init__(self, x, y, channel, data, **kwargs):
+   super().__init__(x, y, channel=channel, data=data, **kwargs)
+
+   # self.value is updated by the dashboard based on the value received by the `update_data()` method of the Instrument for the `data` set for the item.
+   self.value = "data_to_update_and_print"
+
+def draw(self, screen: curses.window, **kwargs):
+   """
+   Draw the item based on its current value. 
+   This is where you would define the way the item looks.
+   """
+   # Use the _calculate_position method to manage the horizontal and vertical alignment of the item 
+   xpos, ypos = self._calculate_position(screen, self.value)
+   
+   lines = self.value.splitlines()
+
+   for i, line in enumerate(lines):
+         screen.addstr(ypos+i, xpos, line)
+
+   # if you know the text is contained in a single line you can skip the for loop and simply use:
+   # screen.addstr(ypos, xpos, line)
+```
+
+### Editable item
 (WIP)

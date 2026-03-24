@@ -2,7 +2,6 @@ import curses
 import time
 import threading
 import queue
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .dashboard_item import *
 from .instrument import Instrument
@@ -21,7 +20,6 @@ class Dashboard:
         curses screen object supplied by ``curses.wrapper``.
     data_update_interval : float
         In seconds, interval between instrument polls.
-        More precisely, interval between the moment when the last instrument has updated and the next polling starts.
     cycle : bool
         Whether the grid allows cycling, i.e. navigating between the first and the last element of a line/column.
     header : str
@@ -52,19 +50,20 @@ class Dashboard:
         - `Dashboard.__init__` starts a daemon thread that runs `_update_data_loop`.
         - `run()` is the main thread's drawing loop; it consumes the data queue.
         - `update_data` launches all the instrument data updates at once, and saves in the data queue the updates of each instrument, as they finish.
-            Once all the instruments have been updated, after `data_update_interval` seconds another update is called for all instruments.
-            Exceptions are caught and logged.
 
     Examples
     --------
-    >>> def main(stdscr):
-    ...     dash = Dashboard(stdscr, header="LabTerm example")
-    ...     dash.add_instruments(MyInstrument(channel=0))
-    ...     dash.add_items(MyDashboardItem(...))
-    ...     dash.run()...   
-    ... if __name__ == '__main__':
-    ...     import curses
-    ...     curses.wrapper(main)
+
+    .. code:: python
+
+        def main(stdscr):
+            dash = Dashboard(stdscr, header="LabTerm example")
+            dash.add_instruments(MyInstrument(channel=0))
+            dash.add_items(MyDashboardItem(...))
+            dash.run()...   
+        if __name__ == '__main__':
+            import curses
+            curses.wrapper(main)
 
     """
     DEFAULT_CONTROLS = [ 

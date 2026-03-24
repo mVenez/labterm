@@ -9,7 +9,7 @@ It's designed to be as modular as possible: if some functionality you need is mi
 
 **When should I use this?**
 1. You need some form of real-time graphical interface, but you don't want to bother with LabView or a more complex GUI library like QT, or when you need to access the interface remotely via SSH. 
-2. You have a python interface/binding to the instrumentation you need or building one is easy (for example on a Raspberry Pi, using GPIO and I2C).
+2. You have a python interface/binding to the instrumentation you need or building one is easy (for example with PyVISA or on a Raspberry Pi, using GPIO and I2C).
 
 
 ## Installation
