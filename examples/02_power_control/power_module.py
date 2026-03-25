@@ -61,7 +61,7 @@ class PowerModule(Instrument):
     
     def _get_current(self) -> float:
         """Measured current in mA"""
-        return self.data['actual_voltage'] / 500 + random.normalvariate(0,1)
+        return self.data['actual_voltage'] / 50 + random.normalvariate(0,1)
 
 
     def ramp(self, new_voltage):
